@@ -14,7 +14,8 @@
 # export before sourcing the line in the previous point or while running for temporary
 # modifications: export <option>=1
 # - Supported options:
-#       - SHOW_SYS_STATS -> Shows the most CPU consuming process at the moment
+#		- SHOW_BAT_STATUS -> Shows the battery charge and if you are running on AC or battery
+#       - SHOW_SYS_STATS  -> Shows the most CPU consuming process at the moment
 #       - SHOW_QEMU -> Shows currently running Qemu VMs. Beware of it's performance impact.
 #       - SHOW_VBOX -> Shows currently running VirtualBox VMs. Beware of it's performance impact.
 #       - SHOW_GIT  -> Shows GIT information of current working directory. It requires that 
@@ -34,6 +35,17 @@
 
 export PROMPT_COMMAND=prompt
 
+# Colors
+color_default="\[\e[0m\]"
+color_orange="\[\e[0;30m\]"
+color_red="\[\e[0;31m\]"
+color_green="\[\e[0;32m\]"
+color_yellow="\[\e[0;33m\]"
+color_blue="\[\e[1;34m\]"
+color_fucsia="\[\e[0;35m\]"
+color_cyan="\[\e[0;36m\]"
+color_grey="\[\e[0;37m\]"
+
 # Function that evaluates last command's exit code.
 # It will show OK if it returned 0, it prints the result code and the command line
 # otherwise. If the length is greater than certain length (default = 30 chars)
@@ -41,14 +53,14 @@ export PROMPT_COMMAND=prompt
 function exitstatus() {
     local MAX_CHARS=30;
 	if [[ "${lastCommandResult}" -eq "0" ]]; then
-		echo "\[\e[0;32m\]OK\[\e[0m\]";
+		echo "${color_green}OK${color_default}";
 	else
 		local suffix="";
 		if [[ "`echo ${lastCommand} | wc -m`" -gt ${MAX_CHARS} ]]; then
 			suffix="...";
 		fi;
 		local commandCut="$(echo ${lastCommand} | cut -c 1-${MAX_CHARS})"
-		echo "\[\e[0;31m\]CMD (Exit Code: ${lastCommandResult}): ${commandCut}${suffix}\[\e[0m\]";
+		echo "${color_red}CMD (Exit Code: ${lastCommandResult}): ${commandCut}${suffix}${color_default}";
 	fi
 }
 
@@ -97,6 +109,31 @@ function syssummary() {
     local mem="$(echo "${guiltyProc}" | cut -f2 -d',' | cut -f2- -d' ')";
     local name="$(echo "${guiltyProc}" | cut -f2 -d'.' | cut -f2- -d' ')";
     echo "${name}{C:${cpu}%-M:${mem}%}";
+	printTiming "Performance info timing" $START;
+}
+
+# Returns charge status for all batteries installed
+function batStatus() {
+	local START=$(date +%s.%n)
+	local SYS_BAT_BASE="/sys/class/power_supply/"
+	local BAT_STR=""
+	if [ 1 -eq `cat ${SYS_BAT_BASE}/AC/online` ]; then
+	  BAT_STR="${color_green}AC:"
+	else
+	  BAT_STR="${color_red}Bat:"
+	fi
+	local BAT_NO=1
+
+	for bat in `ls ${SYS_BAT_BASE}`; do
+	  # Checking if batteries attributes exist
+      if [ -f "${SYS_BAT_BASE}/${bat}/capacity" ]; then	  
+		local BAT_CHARGING=""
+  	    local BAT_CHARGE=`cat "${SYS_BAT_BASE}/${bat}/capacity"`;
+		BAT_STR="${BAT_STR} B${BAT_NO}-${BAT_CHARGING}${BAT_CHARGE}%" 
+	    BAT_NO=$((${BAT_NO} + 1))
+	  fi	
+	done;
+	echo "$BAT_STR"
 	printTiming "Performance info timing" $START;
 }
 
@@ -171,14 +208,17 @@ function prompt_right() {
 	if [ -n "${SHOW_SYS_STATS}" ]; then
 		sysstats="$(syssummary)"
     fi
-	echo "\[\e[0;32m\]${jobs}\[\e[1;34m\]${containersAndVms}\[\e[0m\]\[\e[0;36m\] ${sysstats} $(date +%H:%M:%S)\[\e[0m\]";
+	if [ -n "${SHOW_BAT_STATUS}" ]; then
+		batstatus="$(batStatus)"
+	fi
+	echo "${color_green}${jobs}${color_blue}${containersAndVms}${batstatus} ${color_red}${sysstats} ${color_cyan}$(date +%H:%M:%S)${color_default}";
 	printTiming "Right" $START
 }
 
 # Returns the left portion of the prompt
 function prompt_left() {
 	local START=$(date +%s.%N)
-	echo "$USER@$HOST:\[\e[0;34m\] "$PWD" \[\e[0;35m\]$(stat -c '%A %U:%G' "$PWD") | D:${dir} (.*:${hiddenDir}) | F:${files} (.*:${hiddenFiles})\[\e[0m\]";
+	echo "$USER@$HOST:${color_blue} "$PWD" ${color_fucsia}$(stat -c '%A %U:%G' "$PWD") | D:${dir} (.*:${hiddenDir}) | F:${files} (.*:${hiddenFiles})${color_default}";
 	printTiming "Left" $START
 }
 
@@ -243,10 +283,10 @@ function prompt() {
 	lastCommand="$(history 1 | cut -f3- -d' ')";
     
     #### Left
-    dir="$(find . -maxdepth 1 -type d | wc -l)";
-    hiddenDir="$(find . -maxdepth 1 -type d -name ".?*" | wc -l)";
-	files="$(find . -maxdepth 1 -type f | wc -l)";
-    hiddenFiles="$(find . -maxdepth 1 -type f -name ".*" | wc -l)";
+    dir="$(find . -maxdepth 1 -type d 2>/dev/null | wc -l)";
+    hiddenDir="$(find . -maxdepth 1 -type d -name ".?*" 2>/dev/null | wc -l)";
+	files="$(find . -maxdepth 1 -type f 2>/dev/null | wc -l)";
+    hiddenFiles="$(find . -maxdepth 1 -type f -name ".*" 2>/dev/null | wc -l)";
 	promptLeftStr="$(prompt_left)" 
 	printTiming "Left side" $START
 	
@@ -268,7 +308,7 @@ function prompt() {
 	containersAndVms="${containersAndVms} Lxc: $(lxcRunning) Docker: $(dockerRunning) ";
     # Sys stats summary
 	if [ -n "${SHOW_SYS_STATS}" ]; then
-	    summary="$(top -bn1 | head -8)";
+	    summary="$(top -bn1 | grep -v top | head -6)";
 	fi
     promptRightStr="$(prompt_right)" 
 	printTiming "Right side" $START
@@ -278,7 +318,7 @@ function prompt() {
     if [ -n "${SHOW_GIT}" ]; then
         GIT_OUTPUT=$(__git_ps1 "(%s) ")
     fi
-	local lineTwo="\[\e[0;32m\]${GIT_OUTPUT}\[\e[0m\]\\$ ";
+	local lineTwo="${color_green}${GIT_OUTPUT}${color_default}\\$ ";
 
 	PS1=$(echo -e "${promptLeftStr}$(newline_spaces "${centerSpacesStr}")${promptCenterStr}$(newline_spaces "$(right_spaces)")${promptRightStr}\n${lineTwo}");
 	printTiming "Prompt timing" $START

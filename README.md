@@ -10,6 +10,7 @@ It divides the prompt line in three sections: left, center and right. If they do
  export <option>=1
  ```
  Supported options:
+ * `SHOW_BAT_STATUS`: Shows the battery charge and if you are running on AC or battery 
  * `SHOW_SYS_STATS`: Shows the most CPU consuming process at the moment
  * `SHOW_QEMU`: Shows currently running Qemu VMs. Beware of it's performance impact.
  * `SHOW_VBOX`: Shows currently running VirtualBox VMs. Beware of it's performance impact.
@@ -22,4 +23,5 @@ It divides the prompt line in three sections: left, center and right. If they do
  * `SHOW_TIMING`: Only for debug purposes. It prints timing information to stderr in order to help spotting commands that might slow the prompt.
 
  Copyright (C) 2016 Aitor Pazos <mail@aitorpazos.es>
+ 
  Distributed under the GNU General Public License, version 3.0.
