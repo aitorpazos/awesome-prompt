@@ -127,9 +127,19 @@ function batStatus() {
 	for bat in `ls ${SYS_BAT_BASE}`; do
 	  # Checking if batteries attributes exist
       if [ -f "${SYS_BAT_BASE}/${bat}/capacity" ]; then	  
+	    local BAT_NAME=`cat ${SYS_BAT_BASE}/${bat}/model_name`
+		local DISPLAY_BAT_NAME=${BAT_NAME}
+		if [ ${#DISPLAY_BAT_NAME} -gt 7 ]; then
+			DISPLAY_BAT_NAME=${DISPLAY_BAT_NAME:0:5}..	
+		else
+			DISPLAY_BAT_NAME=${DISPLAY_BAT_NAME}-
+		fi
 		local BAT_CHARGING=""
-  	    local BAT_CHARGE=`cat "${SYS_BAT_BASE}/${bat}/capacity"`;
-		BAT_STR="${BAT_STR} B${BAT_NO}-${BAT_CHARGING}${BAT_CHARGE}%" 
+  	    local BAT_CHARGE=`cat "${SYS_BAT_BASE}/${bat}/capacity"`%;
+		if [ -f ${SYS_BAT_BASE}/${bat}/capacity_level ] && [ "Full" == `cat "${SYS_BAT_BASE}/${bat}/capacity_level"` ]; then
+			BAT_CHARGE="Full"
+		fi
+		BAT_STR="${BAT_STR} ${DISPLAY_BAT_NAME}${BAT_CHARGING}${BAT_CHARGE}" 
 	    BAT_NO=$((${BAT_NO} + 1))
 	  fi	
 	done;
@@ -218,7 +228,7 @@ function prompt_right() {
 # Returns the left portion of the prompt
 function prompt_left() {
 	local START=$(date +%s.%N)
-	echo "$USER@$HOST:${color_blue} "$PWD" ${color_fucsia}$(stat -c '%A %U:%G' "$PWD") | D:${dir} (.*:${hiddenDir}) | F:${files} (.*:${hiddenFiles})${color_default}";
+	echo "$USER@$HOST: ${color_fucsia}$(stat -c '%A %U:%G' "$PWD") | D:${dir} (.*:${hiddenDir}) | F:${files} (.*:${hiddenFiles})${color_default}";
 	printTiming "Left" $START
 }
 
@@ -316,9 +326,9 @@ function prompt() {
     #### Second line
     local GIT_OUTPUT=""
     if [ -n "${SHOW_GIT}" ]; then
-        GIT_OUTPUT=$(__git_ps1 "(%s) ")
+        GIT_OUTPUT=$(__git_ps1 " (%s)")
     fi
-	local lineTwo="${color_green}${GIT_OUTPUT}${color_default}\\$ ";
+	local lineTwo="${color_blue}"$PWD"${color_green}${GIT_OUTPUT}${color_default}\\$";
 
 	PS1=$(echo -e "${promptLeftStr}$(newline_spaces "${centerSpacesStr}")${promptCenterStr}$(newline_spaces "$(right_spaces)")${promptRightStr}\n${lineTwo}");
 	printTiming "Prompt timing" $START
