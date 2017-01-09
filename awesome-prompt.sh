@@ -287,9 +287,9 @@ function center_spaces() {
 #
 # You should place heavy commands that should only be run once per prompt in this function
 function prompt() {
+	lastCommandResult="$?";
     # Saving initial time for logging purposes
     local START=$(date +%s.%N)
-	lastCommandResult="$?";
 	lastCommand="$(history 1 | cut -f3- -d' ')";
     
     #### Left
@@ -328,7 +328,7 @@ function prompt() {
     if [ -n "${SHOW_GIT}" ]; then
         GIT_OUTPUT=$(__git_ps1 " (%s)")
     fi
-	local lineTwo="${color_blue}"$PWD"${color_green}${GIT_OUTPUT}${color_default}\\$";
+	local lineTwo="${color_blue}"$PWD"${color_green}${GIT_OUTPUT}${color_default}\\$ ";
 
 	PS1=$(echo -e "${promptLeftStr}$(newline_spaces "${centerSpacesStr}")${promptCenterStr}$(newline_spaces "$(right_spaces)")${promptRightStr}\n${lineTwo}");
 	printTiming "Prompt timing" $START
