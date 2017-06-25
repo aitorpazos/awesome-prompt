@@ -168,11 +168,16 @@ function lxcRunning() {
 	local START=$(date +%s.%N)
     which virsh > /dev/null 2>&1;
     if [[ "$?" -eq "0" ]]; then
-        local lxcOutput="$(echo "$(virsh -r -c lxc:/// list --name | wc -l) - 1" | bc)";
-        if [[ "${lxcOutput}" -ne "0" ]]; then
+      local vmCount="$(echo \"$(virsh -r -c lxc:/// list --name 2> /dev/null | wc -l) - 1\" | bc)";
+      if [[ "${vmCount}" -ge "0" ]]; then
+        local lxcOutput="${vmCount}";
+        if [[ "${lxcOutput}" -gt "0" ]]; then
             lxcOutput="${lxcOutput} {"$(virsh -r -c lxc:/// list --name)"}";
-        fi
+        fi;
         echo ${lxcOutput};
+      else
+        echo "Off";
+      fi;
     else
         echo "Off";
     fi;
@@ -297,11 +302,11 @@ function prompt() {
     hiddenDir="$(find . -maxdepth 1 -type d -name ".?*" 2>/dev/null | wc -l)";
 	files="$(find . -maxdepth 1 -type f 2>/dev/null | wc -l)";
     hiddenFiles="$(find . -maxdepth 1 -type f -name ".*" 2>/dev/null | wc -l)";
-	promptLeftStr="$(prompt_left)" 
+	promptLeftStr="$(prompt_left)"
 	printTiming "Left side" $START
-	
+
     #### Center
-    promptCenterStr="$(prompt_center)" 
+    promptCenterStr="$(prompt_center)"
     centerSpacesStr="$(center_spaces)"
 	printTiming "Center side" $START
 
@@ -310,17 +315,24 @@ function prompt() {
 	#VBox and Qemu are a bit too slow...
 	containersAndVms=""
 	if [ -n "${SHOW_VBOX}" ]; then
-		containersAndVms="${containersAndVms} Vbox: $(vboxRunning)";
+		containersAndVms="${containersAndVms} VBox: $(vboxRunning)";
 	fi
 	if [ -n "${SHOW_QEMU}" ]; then
 		containersAndVms="${containersAndVms} Qemu: $(qemuRunning)";
 	fi
-	containersAndVms="${containersAndVms} Lxc: $(lxcRunning) Docker: $(dockerRunning) ";
+    if [ -n "${SHOW_LXC}" ]; then
+    	containersAndVms="${containersAndVms} Lxc: $(lxcRunning)";
+    fi
+    if [ -n "${SHOW_DOCKER}" ]; then
+    	containersAndVms="${containersAndVms} Docker: $(dockerRunning)";
+    fi
+    containersAndVms="${containersAndVms} "
+
     # Sys stats summary
 	if [ -n "${SHOW_SYS_STATS}" ]; then
 	    summary="$(top -bn1 | grep -v top | head -6)";
 	fi
-    promptRightStr="$(prompt_right)" 
+    promptRightStr="$(prompt_right)"
 	printTiming "Right side" $START
 
     #### Second line
