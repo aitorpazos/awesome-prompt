@@ -101,7 +101,7 @@ function stripcolor() {
 
 # With emojis, characters calculations may need some adjustment
 function char_adjustment() {
-    echo -e "$*" | sed 's/[📂🕵📄📦🐋🔌🔋💻🧮❌👉✅▶⡇]/--/g'
+    echo -e "$*" | sed 's/[📂🕵📄🐍📦🐋🔌🔋💻🧮❌👉✅▶⡇]/--/g'
 }
 
 # Returns the count of characters of a string
@@ -359,14 +359,14 @@ function prompt() {
         GIT_OUTPUT=$(__git_ps1 "⎇ %s i")
     fi
 
-    # Python virtual env support 
+    # Python virtual env support
     local PYTHON_VENV_OUTPUT=""
     if [ -n "${VIRTUAL_ENV}" ]; then
-        PYTHON_VENV_OUTPUT=" ${color_red}[Py venv: $(basename ${VIRTUAL_ENV})]${color_default}"
+        PYTHON_VENV_OUTPUT=" 🐍$(basename ${VIRTUAL_ENV}) "
     fi
 
     # Set the actual line content
-	local lineTwo="${color_blue}"$PWD"${color_green}${GIT_OUTPUT}${color_default}${PYTHON_VENV_OUTPUT}\\$ ";
+	local lineTwo="${color_blue}${bg_white}"$PWD"${color_black}${bg_yellow}${GIT_OUTPUT}${PYTHON_VENV_OUTPUT}${color_white}${bg_black}▶${color_default}";
 
 	PS1=$(echo -e "${promptLeftStr}$(newline_spaces "${centerSpacesStr}")${promptCenterStr}$(newline_spaces "$(right_spaces)")${promptRightStr}\n${lineTwo}");
 	printTiming "Prompt timing" $START
