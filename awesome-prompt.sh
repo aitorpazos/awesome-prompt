@@ -36,6 +36,7 @@
 #
 
 export PROMPT_COMMAND=prompt
+export HOST=$(hostname -s)
 
 # Colors
 color_default="\[\e[0m\]"
@@ -219,16 +220,17 @@ function qemuRunning() {
 # Returns the status of VBox VMs
 function vboxRunning() {
 	local START=$(date +%s.%N)
-    which VBoxManage > /dev/null 2>&1;
-    if [[ "$?" -eq "0" ]]; then
-        local vboxOutput="$(echo "$(VBoxManage list runningvms | wc -l)" | bc)";
-        if [[ "${vboxOutput}" -ne "0" ]]; then
-            vboxOutput="${vboxOutput} "$(VBoxManage list runningvms | cut -d'"' -f2)"";
-        fi
-        echo ${vboxOutput};
-    else
-        echo "Off";
+    local vboxOutput="Off"
+    if [ -c /dev/vboxdrv ]; then
+        which VBoxManage > /dev/null 2>&1;
+        if [[ "$?" -eq "0" ]]; then
+            vboxOutput="$(echo "$(VBoxManage list runningvms | wc -l)" | bc)";
+            if [[ "${vboxOutput}" -ne "0" ]]; then
+                vboxOutput="${vboxOutput} {"$(VBoxManage list runningvms | cut -d'"' -f2)"}";
+            fi
+        fi;
     fi;
+    echo ${vboxOutput}
 	printTiming "VBox timing" $START
 }
 
@@ -356,7 +358,15 @@ function prompt() {
     if [ -n "${SHOW_GIT}" ]; then
         GIT_OUTPUT=$(__git_ps1 "⎇ %s i")
     fi
-	local lineTwo="${color_blue}${bg_white}"$PWD"${color_blue}${bg_yellow}${GIT_OUTPUT}${color_white}${bg_black}▶${color_white}";
+
+    # Python virtual env support 
+    local PYTHON_VENV_OUTPUT=""
+    if [ -n "${VIRTUAL_ENV}" ]; then
+        PYTHON_VENV_OUTPUT=" ${color_red}[Py venv: $(basename ${VIRTUAL_ENV})]${color_default}"
+    fi
+
+    # Set the actual line content
+	local lineTwo="${color_blue}"$PWD"${color_green}${GIT_OUTPUT}${color_default}${PYTHON_VENV_OUTPUT}\\$ ";
 
 	PS1=$(echo -e "${promptLeftStr}$(newline_spaces "${centerSpacesStr}")${promptCenterStr}$(newline_spaces "$(right_spaces)")${promptRightStr}\n${lineTwo}");
 	printTiming "Prompt timing" $START
