@@ -101,7 +101,8 @@ function stripcolor() {
 
 # With emojis, characters calculations may need some adjustment
 function char_adjustment() {
-    echo -e "$*" | sed 's/[📂🕵📄🐍📦🐋🔌🔋💻🧮❌👉✅▶⡇]/--/g'
+    #echo -e "$*" | sed 's/[📂🕵📄🐍📦🐋🔌🔋💻🧮❌👉✅▶⡇]/--/g'
+    echo -e "$*" | sed 's/[📂🕵📄🐍📦🐋🔌🔋💻🧮❌👉✅▶]/--/g'
 }
 
 # Returns the count of characters of a string
@@ -333,13 +334,13 @@ function prompt() {
 	#VBox and Qemu are a bit too slow...
 	containersAndVms=""
 	if [ -n "${SHOW_VBOX}" ]; then
-		containersAndVms="${containersAndVms} 📦▶$(vboxRunning)";
+		containersAndVms="${containersAndVms} 📦VBox▶$(vboxRunning)";
 	fi
 	if [ -n "${SHOW_QEMU}" ]; then
-		containersAndVms="${containersAndVms} Qemu▶$(qemuRunning)";
+		containersAndVms="${containersAndVms} 📦Qemu▶$(qemuRunning)";
 	fi
     if [ -n "${SHOW_LXC}" ]; then
-    	containersAndVms="${containersAndVms} Lxc▶$(lxcRunning)";
+    	containersAndVms="${containersAndVms} 📦Lxc▶$(lxcRunning)";
     fi
     if [ -n "${SHOW_DOCKER}" ]; then
     	containersAndVms="${containersAndVms} 🐋▶$(dockerRunning)";
