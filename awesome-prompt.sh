@@ -101,7 +101,7 @@ function stripcolor() {
 
 # With emojis, characters calculations may need some adjustment
 function char_adjustment() {
-    echo -e "$*" | sed 's/[📂🕵📄🐍📦🐋🔌🔋💻🧮❌👉✅▶⡇]/--/g'
+    echo -e "$*" | sed 's/[📂🕵📄🐍📦🐋🔌🔋💻🧮❌👉✅▶⡇]/--/g'
 }
 
 # Returns the count of characters of a string
@@ -251,7 +251,7 @@ function prompt_right() {
 # Returns the left portion of the prompt
 function prompt_left() {
 	local START=$(date +%s.%N)
-	echo "${bg_blue}$USER@\h${color_blue}${bg_white}▶${color_blue}${bg_white}$(stat -c '%A %U:%G' "$PWD") | 📂${dir} (🕵${hiddenDir}) | 📄${files} (🕵${hiddenFiles})  ${color_default}";
+	echo "${bg_blue}$USER@\h${color_blue}${bg_white}${color_blue}${bg_white}$(stat -c '%A %U:%G' "$PWD") | 📂${dir} (🕵${hiddenDir}) | 📄${files} (🕵${hiddenFiles})  ${color_default}";
 	printTiming "Left" $START
 }
 
@@ -366,7 +366,7 @@ function prompt() {
     fi
 
     # Set the actual line content
-	local lineTwo="${color_blue}${bg_white}"$PWD"${color_black}${bg_yellow}${GIT_OUTPUT}${PYTHON_VENV_OUTPUT}${color_white}${bg_black}▶${color_default}";
+	local lineTwo="${color_blue}${bg_white}"$PWD"${color_black}${bg_yellow}${GIT_OUTPUT}${PYTHON_VENV_OUTPUT}${color_white}${bg_black}${color_default}";
 
 	PS1=$(echo -e "${promptLeftStr}$(newline_spaces "${centerSpacesStr}")${promptCenterStr}$(newline_spaces "$(right_spaces)")${promptRightStr}\n${lineTwo}");
 	printTiming "Prompt timing" $START
