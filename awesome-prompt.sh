@@ -101,7 +101,7 @@ function stripcolor() {
 
 # With emojis, characters calculations may need some adjustment
 function char_adjustment() {
-    echo -e "$*" | sed 's/[📂🕵📄🐍📦🐋🔌🔋💻🧮❌👉✅▶⡇]/--/g'
+    echo -e "$*" | sed 's/[📂🕵📄🐍📦🐋🔌🔋💻🧮❌👉✅▶⡇]/--/g'
 }
 
 # Returns the count of characters of a string
@@ -244,14 +244,14 @@ function prompt_right() {
 	if [ -n "${SHOW_BAT_STATUS}" ]; then
 		batstatus="$(batStatus)"
 	fi
-	echo "${color_green}${bg_white}${jobs}${color_blue}${bg_white}${containersAndVms}${batstatus}${sysstats} ${color_blue}${bg_white}${color_default}${bg_blue} $(date +%H:%M:%S)${color_default}";
+	echo "${color_white}${color_green}${bg_white}${jobs}${color_black}${bg_white}${containersAndVms}${batstatus}${sysstats} ${color_black}${bg_white}${color_default}${bg_blue} $(date +%H:%M:%S)${color_default}";
 	printTiming "Right" $START
 }
 
 # Returns the left portion of the prompt
 function prompt_left() {
 	local START=$(date +%s.%N)
-	echo "${bg_blue}$USER@\h${color_blue}${bg_white}${color_blue}${bg_white}$(stat -c '%A %U:%G' "$PWD") | 📂${dir} (🕵${hiddenDir}) | 📄${files} (🕵${hiddenFiles})  ${color_default}";
+	echo "${bg_blue}$USER@\h${color_blue}${bg_white}${color_black}${bg_white}$(stat -c '%A %U:%G' "$PWD") | 📂${dir} (🕵${hiddenDir}) | 📄${files} (🕵${hiddenFiles})${color_white}${color_default}";
 	printTiming "Left" $START
 }
 
@@ -366,7 +366,7 @@ function prompt() {
     fi
 
     # Set the actual line content
-	local lineTwo="${color_blue}${bg_white}"$PWD"${color_black}${bg_yellow}${GIT_OUTPUT}${PYTHON_VENV_OUTPUT}${color_white}${bg_black}${color_default}";
+	local lineTwo="${color_black}${bg_white}"$PWD"${color_black}${bg_yellow}${GIT_OUTPUT}${PYTHON_VENV_OUTPUT}${color_white}${bg_black}${color_default}";
 
 	PS1=$(echo -e "${promptLeftStr}$(newline_spaces "${centerSpacesStr}")${promptCenterStr}$(newline_spaces "$(right_spaces)")${promptRightStr}\n${lineTwo}");
 	printTiming "Prompt timing" $START
