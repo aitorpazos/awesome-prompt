@@ -251,7 +251,7 @@ function prompt_right() {
 # Returns the left portion of the prompt
 function prompt_left() {
 	local START=$(date +%s.%N)
-	echo "${bg_blue}$USER@\h${color_blue}${bg_white}${color_black}${bg_white}$(stat -c '%A %U:%G' "$PWD") | 📂${dir} (🕵${hiddenDir}) | 📄${files} (🕵${hiddenFiles})${color_white}${color_default}";
+	echo "${bg_blue}$USER@\h${color_blue}${bg_white}${color_black}${bg_white}$(stat -c '%A %U:%G' "$PWD") | 📂${dir} (🕵${hiddenDir}) | 📄${files} (🕵${hiddenFiles}) ${color_white}${color_default}";
 	printTiming "Left" $START
 }
 
