@@ -40,23 +40,24 @@ export HOST=$(hostname -s)
 
 # Colors
 color_default="\[\e[0m\]"
-color_black="\[\e[0;30m\]"
-color_red="\[\e[0;31m\]"
-color_green="\[\e[0;32m\]"
-color_yellow="\[\e[0;33m\]"
-color_blue="\[\e[0;34m\]"
-color_fucsia="\[\e[0;35m\]"
-color_cyan="\[\e[0;36m\]"
-color_white="\[\e[0;37m\]"
+color_black="\x1b[38;2;0;0;0m"
+color_red="\x1b[38;2;186;38;38m"
+color_green="\x1b[38;2;33;255;38m"
+color_yellow="\x1b[38;2;186;186;38m"
+color_blue="\x1b[38;2;38;38;186m"
+color_fucsia="\x1b[38;2;186;38;186m"
+color_cyan="\x1b[38;2;38;186;186"
+color_white="\x1b[38;2;255;255;255m"
 # Background colors
-bg_black="\[\e[40m\]"
-bg_red="\[\e[41m\]"
-bg_green="\[\e[42m\]"
-bg_yellow="\[\e[43m\]"
-bg_blue="\[\e[44m\]"
-bg_fucsia="\[\e[45m\]"
-bg_cyan="\[\e[46m\]"
-bg_white="\[\e[47m\]"
+bg_default="\[\e[40m\]"
+bg_black="\x1b[48;2;0;0;0m"
+bg_red="\x1b[48;2;186;38;38m"
+bg_green="\x1b[48;2;38;186;38m"
+bg_yellow="\x1b[48;2;186;186;38m"
+bg_blue="\x1b[48;2;38;38;186m"
+bg_fucsia="\x1b[48;2;186;38;186m"
+bg_cyan="\x1b[48;2;38;186;186m"
+bg_white="\x1b[48;2;255;255;255m"
 
 # Function that evaluates last command's exit code.
 # It will show OK if it returned 0, it prints the result code and the command line
@@ -126,7 +127,7 @@ function syssummary() {
     local cpu="$(echo "${guiltyProc}" | cut -f1 -d',')";
     local mem="$(echo "${guiltyProc}" | cut -f2 -d',' | cut -f2- -d' ')";
     local name="$(echo "${guiltyProc}" | cut -f2 -d'.' | cut -f2- -d' ')";
-    echo "${color_red}${bg_white}💻:${cpu}% 🧮:${mem}%◀${color_white}${bg_red}${name}";
+    echo "${color_black}${bg_yellow}💻:${cpu}% 🧮:${mem}%◀${color_yellow}${bg_black}${name}";
 	printTiming "Performance info timing" $START;
 }
 
@@ -245,14 +246,14 @@ function prompt_right() {
 	if [ -n "${SHOW_BAT_STATUS}" ]; then
 		batstatus="$(batStatus)"
 	fi
-	echo "${color_white}${color_green}${bg_white}${jobs}${color_black}${bg_white}${containersAndVms}${batstatus}${sysstats} ${color_black}${bg_white}${color_default}${bg_blue} $(date +%H:%M:%S)${color_default}";
+	echo "${color_black}${color_green}${bg_black}${jobs}${color_default}${bg_black}${containersAndVms}${batstatus}${sysstats} ${color_black}${bg_white}${color_default}${bg_blue} $(date +%H:%M:%S)${color_default}";
 	printTiming "Right" $START
 }
 
 # Returns the left portion of the prompt
 function prompt_left() {
 	local START=$(date +%s.%N)
-	echo "${bg_blue}$USER@\h${color_blue}${bg_white}${color_black}${bg_white}$(stat -c '%A %U:%G' "$PWD") | 📂${dir} (🕵${hiddenDir}) | 📄${files} (🕵${hiddenFiles}) ${color_white}${color_default}";
+	echo "${bg_blue}$USER@\h${color_blue}${bg_black}${color_default}${bg_black}$(stat -c '%A %U:%G' "$PWD") | 📂${dir} (🕵${hiddenDir}) | 📄${files} (🕵${hiddenFiles}) ${color_black}${bg_default}${color_default}";
 	printTiming "Left" $START
 }
 
@@ -357,7 +358,7 @@ function prompt() {
     #### Second line
     local GIT_OUTPUT=""
     if [ -n "${SHOW_GIT}" ]; then
-        GIT_OUTPUT=$(__git_ps1 "⎇ %s i")
+        GIT_OUTPUT=$(__git_ps1 " ⎇ %s ")
     fi
 
     # Python virtual env support
@@ -367,7 +368,7 @@ function prompt() {
     fi
 
     # Set the actual line content
-	local lineTwo="${color_black}${bg_white}"$PWD"${color_black}${bg_yellow}${GIT_OUTPUT}${PYTHON_VENV_OUTPUT}${color_white}${bg_black}${color_default} ";
+	local lineTwo="${color_default}${bg_default}"$PWD"${color_black}${bg_yellow}${GIT_OUTPUT}${PYTHON_VENV_OUTPUT}${color_white}${bg_default}\$${color_default} ";
 
 	PS1=$(echo -e "${promptLeftStr}$(newline_spaces "${centerSpacesStr}")${promptCenterStr}$(newline_spaces "$(right_spaces)")${promptRightStr}\n${lineTwo}");
 	printTiming "Prompt timing" $START

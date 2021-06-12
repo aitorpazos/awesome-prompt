@@ -2,7 +2,11 @@
 This script provides an easy way to enjoy a colorful responsive prompt.
 It divides the prompt line in three sections: left, center and right. If they don't fit, it will move those sections that doesn't fit to the next line.
 
-## Instructions:
+## Prerequisites
+Awesome-prompt expects RGB colors support from the terminal emulator. This quick
+guide provides more info: https://gist.github.com/XVilka/8346728#file-truecolour-md
+
+## Instructions
  In order to use this script using the default config, you just need to add this line to your $HOME/.bashrc file:
     `source <full path to the script>`
  You can modify shown information using environment variables that you can export before sourcing the line in the previous point or while running for temporary modifications:
