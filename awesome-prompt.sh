@@ -27,6 +27,7 @@
 #                           source $HOME/.git-prompt.sh
 #                           export SHOW_GIT=1
 #                           source $HOME/awesome-prompt.sh
+#       - SHOW_SIMPLE    -> Shows a minimal prompt. Useful for screen recording/sharing
 #       - SHOW_TIMING    -> Only for debug purposes. It prints timing information to
 #                           stderr in order to help spotting commands that might
 #                           slow the prompt
@@ -35,29 +36,29 @@
 # Distributed under the GNU General Public License, version 3.0.
 #
 
-export PROMPT_COMMAND=prompt
 export HOST=$(hostname -s)
 
 # Colors
-color_default="\[\e[0m\]"
-color_black="\x1b[38;2;0;0;0m"
-color_red="\x1b[38;2;186;38;38m"
-color_green="\x1b[38;2;33;255;38m"
-color_yellow="\x1b[38;2;186;186;38m"
-color_blue="\x1b[38;2;38;38;186m"
-color_fucsia="\x1b[38;2;186;38;186m"
-color_cyan="\x1b[38;2;38;186;186"
-color_white="\x1b[38;2;255;255;255m"
+color_reset="\[$(tput sgr0)\]"
+color_default="\[$(tput setaf 0)\]"
+color_black="\[$(tput setaf 232)\]"
+color_red="\[$(tput setaf 88)\]"
+color_green="\[$(tput setaf 28)\]"
+color_yellow="\[$(tput setaf 178)\]"
+color_blue="\[$(tput setaf 26)\]"
+color_fucsia="\[$(tput setaf 63)\]"
+color_cyan="\[$(tput setaf 74)\]"
+color_white="\[$(tput setaf 15)\]"
 # Background colors
-bg_default="\[\e[40m\]"
-bg_black="\x1b[48;2;0;0;0m"
-bg_red="\x1b[48;2;186;38;38m"
-bg_green="\x1b[48;2;38;186;38m"
-bg_yellow="\x1b[48;2;186;186;38m"
-bg_blue="\x1b[48;2;38;38;186m"
-bg_fucsia="\x1b[48;2;186;38;186m"
-bg_cyan="\x1b[48;2;38;186;186m"
-bg_white="\x1b[48;2;255;255;255m"
+bg_default="\[$(tput setab 0)\]"
+bg_black="\[$(tput setab 232)\]"
+bg_red="\[$(tput setab 88)\]"
+bg_green="\[$(tput setab 28)\]"
+bg_yellow="\[$(tput setab 178)\]"
+bg_blue="\[$(tput setab 26)\]"
+bg_fucsia="\[$(tput setab 63)\]"
+bg_cyan="\[$(tput setab 74)\]"
+bg_white="\[$(tput setab 15)\]"
 
 # Function that evaluates last command's exit code.
 # It will show OK if it returned 0, it prints the result code and the command line
@@ -66,14 +67,14 @@ bg_white="\x1b[48;2;255;255;255m"
 function exitstatus() {
     local MAX_CHARS=30;
 	if [[ "${lastCommandResult}" -eq "0" ]]; then
-		echo "${color_green}✅${color_default}";
+		echo "${color_green}✅${color_white}";
 	else
 		local suffix="";
 		if [[ "`echo ${lastCommand} | wc -m`" -gt ${MAX_CHARS} ]]; then
 			suffix="...";
 		fi;
 		local commandCut="$(echo ${lastCommand} | cut -c 1-${MAX_CHARS})"
-		echo "${color_red}❌ ${lastCommandResult} 👉 ${commandCut}${suffix}${color_default}";
+		echo "${color_red}❌ ${lastCommandResult} 👉 ${commandCut}${suffix}${color_white}";
 	fi
 }
 
@@ -102,8 +103,7 @@ function stripcolor() {
 
 # With emojis, characters calculations may need some adjustment
 function char_adjustment() {
-    #echo -e "$*" | sed 's/[📂🕵📄🐍📦🐋🔌🔋💻🧮❌👉✅▶⡇]/--/g'
-    echo -e "$*" | sed 's/[📂🕵📄🐍📦🐋🔌🔋💻🧮❌👉✅▶]/--/g'
+    echo -e "$*" | sed 's/[📂🕵📄🐍📦🐋🔌🔋💻🧮❌👉✅▶⡇]/--/g'
 }
 
 # Returns the count of characters of a string
@@ -149,9 +149,9 @@ function batStatus() {
 	    local BAT_NAME=`cat ${SYS_BAT_BASE}/${bat}/model_name`
 		local DISPLAY_BAT_NAME=${BAT_NAME}
 		if [ ${#DISPLAY_BAT_NAME} -gt 7 ]; then
-			DISPLAY_BAT_NAME=${DISPLAY_BAT_NAME:0:5}..▶
+			DISPLAY_BAT_NAME=${DISPLAY_BAT_NAME:0:5}..:
 		else
-			DISPLAY_BAT_NAME=${DISPLAY_BAT_NAME}▶
+			DISPLAY_BAT_NAME=${DISPLAY_BAT_NAME}:
 		fi
 		local BAT_CHARGING=""
   	    local BAT_CHARGE=`cat "${SYS_BAT_BASE}/${bat}/capacity"`%;
@@ -246,14 +246,14 @@ function prompt_right() {
 	if [ -n "${SHOW_BAT_STATUS}" ]; then
 		batstatus="$(batStatus)"
 	fi
-	echo "${color_black}${color_green}${bg_black}${jobs}${color_default}${bg_black}${containersAndVms}${batstatus}${sysstats} ${color_black}${bg_white}${color_default}${bg_blue} $(date +%H:%M:%S)${color_default}";
+	echo "${color_black}${color_green}${bg_black}${jobs}${color_white}${bg_black}${containersAndVms}${batstatus}${sysstats} ${color_black}${bg_white}${color_white}${bg_blue} $(date +%H:%M:%S)${color_reset}";
 	printTiming "Right" $START
 }
 
 # Returns the left portion of the prompt
 function prompt_left() {
 	local START=$(date +%s.%N)
-	echo "${bg_blue}$USER@\h${color_blue}${bg_black}${color_default}${bg_black}$(stat -c '%A %U:%G' "$PWD") | 📂${dir} (🕵${hiddenDir}) | 📄${files} (🕵${hiddenFiles}) ${color_black}${bg_default}${color_default}";
+	echo "${bg_blue}$USER@\h${color_blue}${bg_black}${color_white}${bg_black}$(stat -c '%A %U:%G' "$PWD") | 📂${dir} (🕵${hiddenDir}) | 📄${files} (🕵${hiddenFiles}) ${color_black}${bg_default}${color_default}";
 	printTiming "Left" $START
 }
 
@@ -312,6 +312,10 @@ function center_spaces() {
 #
 # You should place heavy commands that should only be run once per prompt in this function
 function prompt() {
+    if [ -n "${SHOW_SIMPLE}" ]; then
+      PS1="\w\$ "
+      return
+    fi
 	lastCommandResult="$?";
     # Saving initial time for logging purposes
     local START=$(date +%s.%N)
@@ -331,20 +335,20 @@ function prompt() {
 	printTiming "Center side" $START
 
     #### Right
-    jobs="$(if [[ -n "$(jobs)" ]]; then echo '⚙▶\j '; else echo ''; fi)";
+    jobs="$(if [[ -n "$(jobs)" ]]; then echo '⚙:\j '; else echo ''; fi)";
 	#VBox and Qemu are a bit too slow...
 	containersAndVms=""
 	if [ -n "${SHOW_VBOX}" ]; then
-		containersAndVms="${containersAndVms} 📦VBox▶$(vboxRunning)";
+		containersAndVms="${containersAndVms} 📦VBox:$(vboxRunning)";
 	fi
 	if [ -n "${SHOW_QEMU}" ]; then
-		containersAndVms="${containersAndVms} 📦Qemu▶$(qemuRunning)";
+		containersAndVms="${containersAndVms} 📦Qemu:$(qemuRunning)";
 	fi
     if [ -n "${SHOW_LXC}" ]; then
-    	containersAndVms="${containersAndVms} 📦Lxc▶$(lxcRunning)";
+    	containersAndVms="${containersAndVms} 📦Lxc:$(lxcRunning)";
     fi
     if [ -n "${SHOW_DOCKER}" ]; then
-    	containersAndVms="${containersAndVms} 🐋▶$(dockerRunning)";
+    	containersAndVms="${containersAndVms} 🐋:$(dockerRunning)";
     fi
     containersAndVms="${containersAndVms} "
 
@@ -358,7 +362,7 @@ function prompt() {
     #### Second line
     local GIT_OUTPUT=""
     if [ -n "${SHOW_GIT}" ]; then
-        GIT_OUTPUT=$(__git_ps1 " ⎇ %s ")
+        GIT_OUTPUT=$(__git_ps1 " ⎇ %s  ")
     fi
 
     # Python virtual env support
@@ -368,8 +372,9 @@ function prompt() {
     fi
 
     # Set the actual line content
-	local lineTwo="${color_default}${bg_default}"$PWD"${color_black}${bg_yellow}${GIT_OUTPUT}${PYTHON_VENV_OUTPUT}${color_white}${bg_default}\$${color_default} ";
+	local lineTwo="${color_reset}${bg_default}"$PWD"${color_black}${bg_yellow}${GIT_OUTPUT}${PYTHON_VENV_OUTPUT}${color_white}${bg_default}\$${color_reset} ";
 
 	PS1=$(echo -e "${promptLeftStr}$(newline_spaces "${centerSpacesStr}")${promptCenterStr}$(newline_spaces "$(right_spaces)")${promptRightStr}\n${lineTwo}");
 	printTiming "Prompt timing" $START
 }
+
