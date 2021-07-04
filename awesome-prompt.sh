@@ -378,3 +378,5 @@ function prompt() {
 	printTiming "Prompt timing" $START
 }
 
+export PROMPT_COMMAND=prompt
+
